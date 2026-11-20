@@ -1164,7 +1164,7 @@
                   id="editorPromptTitle"
                   class="form-control"
                   type="text"
-                  maxlength="120"
+                  maxlength="100"
                   placeholder="예: 감성 필름 카메라 인물 사진"
                   required
                 />
@@ -1183,7 +1183,7 @@
                   id="editorPromptContent"
                   class="form-textarea"
                   rows="15"
-                  maxlength="20000"
+                  maxlength="10000"
                   placeholder="프롬프트 전체 내용을 입력하거나 붙여넣어 주세요."
                   required
                 ></textarea>
@@ -1715,7 +1715,10 @@
       }
 
       function openAddModal() {
-        if (!state.isAdmin) return;
+        if (!state.isAdmin) {
+          showToast('관리자만 할 수 있어요');
+          return;
+        }
         state.editingPromptId = null;
         editorModalTitle.textContent = '새 프롬프트 추가';
         editorModalHint.textContent = '저장 시 목록에 바로 반영됩니다.';
@@ -1730,7 +1733,10 @@
       }
 
       function openEditModal(item) {
-        if (!state.isAdmin) return;
+        if (!state.isAdmin) {
+          showToast('관리자만 할 수 있어요');
+          return;
+        }
         state.editingPromptId = item.id;
         editorModalTitle.textContent = '프롬프트 수정';
         editorModalHint.textContent = '제목, 분류, 내용을 수정한 뒤 저장하세요.';
@@ -1756,7 +1762,10 @@
       }
 
       function openConfirmDeleteModal(item) {
-        if (!state.isAdmin) return;
+        if (!state.isAdmin) {
+          showToast('관리자만 할 수 있어요');
+          return;
+        }
         state.deletingPrompt = item;
         confirmDeleteTarget.textContent = `선택한 프롬프트: "${item.title}"`;
         confirmDeleteBackdrop.classList.add('open');
@@ -1879,7 +1888,11 @@
       });
 
       confirmDeleteBtn.addEventListener('click', async () => {
-        if (!state.isAdmin || !state.deletingPrompt) return;
+        if (!state.isAdmin) {
+          showToast('관리자만 할 수 있어요');
+          return;
+        }
+        if (!state.deletingPrompt) return;
         const target = state.deletingPrompt;
         const targetPath = `prompts/${target.id}`;
 
@@ -1891,7 +1904,9 @@
           closeConfirmDeleteModal();
           showToast('프롬프트가 삭제됐어요');
         } catch (error) {
-          showToast('삭제 중 문제가 생겼어요.');
+          const isPermError =
+            error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied';
+          showToast(isPermError ? '관리자만 할 수 있어요' : '삭제 중 문제가 생겼어요.');
           handleFirestoreError(error, OperationType.DELETE, targetPath);
         } finally {
           confirmDeleteBtn.disabled = false;
@@ -1914,8 +1929,9 @@
       promptEditorForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.isAdmin) {
-          editorFormError.textContent = '관리자만 사용할 수 있어요.';
+          editorFormError.textContent = '관리자만 할 수 있어요';
           editorFormError.classList.add('visible');
+          showToast('관리자만 할 수 있어요');
           return;
         }
 
@@ -1923,8 +1939,8 @@
         const category = editorPromptCategory.value;
         const content = editorPromptContent.value;
 
-        if (!title || title.length > 120) {
-          editorFormError.textContent = '제목은 1자 이상 120자 이하로 입력해 주세요.';
+        if (!title || title.length > 100) {
+          editorFormError.textContent = '제목은 1자 이상 100자 이하로 입력해 주세요.';
           editorFormError.classList.add('visible');
           return;
         }
@@ -1933,8 +1949,8 @@
           editorFormError.classList.add('visible');
           return;
         }
-        if (!content.trim() || content.length > 20000) {
-          editorFormError.textContent = '내용은 1자 이상 20,000자 이하로 입력해 주세요.';
+        if (!content.trim() || content.length > 10000) {
+          editorFormError.textContent = '내용은 1자 이상 10,000자 이하로 입력해 주세요.';
           editorFormError.classList.add('visible');
           return;
         }
@@ -1966,8 +1982,15 @@
             showToast('새 프롬프트가 저장됐어요!');
           }
         } catch (error) {
-          editorFormError.textContent = '저장 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
+          const isPermError =
+            error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied';
+          editorFormError.textContent = isPermError
+            ? '관리자만 할 수 있어요'
+            : '저장 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
           editorFormError.classList.add('visible');
+          if (isPermError) {
+            showToast('관리자만 할 수 있어요');
+          }
           handleFirestoreError(
             error,
             isEditing ? OperationType.UPDATE : OperationType.CREATE,

@@ -33,12 +33,12 @@ service cloud.firestore {
         && data.keys().hasOnly(['title', 'category', 'content', 'createdAt'])
         && data.title is string
         && data.title.size() >= 1
-        && data.title.size() <= 120
+        && data.title.size() <= 100
         && data.category is string
         && data.category in ['사진 합성', '스타일 변환', '캐릭터·포스터']
         && data.content is string
         && data.content.size() >= 1
-        && data.content.size() <= 20000
+        && data.content.size() <= 10000
         && data.createdAt is timestamp;
     }
 

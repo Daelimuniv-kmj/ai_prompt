@@ -9,7 +9,7 @@
           "type": "string",
           "description": "Display title of the prompt.",
           "minLength": 1,
-          "maxLength": 120
+          "maxLength": 100
         },
         "category": {
           "type": "string",
@@ -20,7 +20,7 @@
           "type": "string",
           "description": "Full prompt text content preserving line breaks and brackets.",
           "minLength": 1,
-          "maxLength": 20000
+          "maxLength": 10000
         },
         "createdAt": {
           "type": "string",

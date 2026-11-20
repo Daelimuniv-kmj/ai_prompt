@@ -6,7 +6,7 @@
 - Every document must contain **exact** keys: `['title', 'category', 'content', 'createdAt']` (no shadow fields).
 - `createdAt` must equal `request.time` on `create` and must remain immutable (`incoming().createdAt == existing().createdAt`) on `update`.
 - `update` may only modify `['title', 'category', 'content']`.
-- `title`: `1..120` chars, `category`: `['사진 합성', '스타일 변환', '캐릭터·포스터']`, `content`: `1..20000` chars.
+- `title`: `1..100` chars, `category`: `['사진 합성', '스타일 변환', '캐릭터·포스터']`, `content`: `1..10000` chars.
 
 ## 2. Adversarial Payloads Checked
 1. **Unauthenticated Create/Update/Delete**: Denied by `isAdmin()`.
